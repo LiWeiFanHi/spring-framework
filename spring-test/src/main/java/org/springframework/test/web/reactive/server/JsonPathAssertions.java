@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 
 /**
@@ -174,6 +175,18 @@ public class JsonPathAssertions {
 		Object value = this.pathHelper.evaluateJsonPath(this.content, targetType);
 		consumer.accept((T) value);
 		return this.bodySpec;
+	}
+
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		throw new AssertionError("Object#equals is disabled " +
+				"to avoid being used in error instead of JsonPathAssertions#isEqualTo(String).");
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

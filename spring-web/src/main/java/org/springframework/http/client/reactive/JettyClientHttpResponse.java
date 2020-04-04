@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,8 +46,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 
 	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Publisher<DataBuffer> content) {
-		Assert.notNull(reactiveResponse, "reactiveResponse should not be null");
-		Assert.notNull(content, "content should not be null");
 		this.reactiveResponse = reactiveResponse;
 		this.content = Flux.from(content);
 	}
@@ -69,17 +66,15 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
 		if (cookieHeader != null) {
-			cookieHeader.forEach(header -> {
-				HttpCookie.parse(header)
-						.forEach(cookie -> result.add(cookie.getName(),
-								ResponseCookie.from(cookie.getName(), cookie.getValue())
-						.domain(cookie.getDomain())
-						.path(cookie.getPath())
-						.maxAge(cookie.getMaxAge())
-						.secure(cookie.getSecure())
-						.httpOnly(cookie.isHttpOnly())
-						.build()));
-			});
+			cookieHeader.forEach(header -> HttpCookie.parse(header)
+					.forEach(c -> result.add(c.getName(), ResponseCookie.fromClientResponse(c.getName(), c.getValue())
+							.domain(c.getDomain())
+							.path(c.getPath())
+							.maxAge(c.getMaxAge())
+							.secure(c.getSecure())
+							.httpOnly(c.isHttpOnly())
+							.build()))
+			);
 		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
